@@ -8,7 +8,14 @@ const blogRouter = require("./routes/blogRoute");
 const cloudinary = require("./config/cloudinaryConfig");
 const { apiLimiter } = require("./middleware/rateLimiter");
 require("./cron");
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://mern-blog-app-client-two.vercel.app",
+    ],
+  }),
+);
 
 const PORT = process.env.PORT || 3000;
 
