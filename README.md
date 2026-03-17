@@ -4,6 +4,14 @@ A full-stack blogging platform built using the MERN stack where users can create
 
 This project demonstrates modern full-stack development practices including REST APIs, authentication, cloud storage integration, and frontend state management.
 
+## 🌐 Live Demo
+
+🚀 **Frontend (Vercel):**  
+👉 [https://mern-blog-app-rho-two.vercel.app](https://mern-blog-app-rho-two.vercel.app)
+
+⚙️ **Backend (Render):**  
+👉 https://mern-blog-app-0ply.onrender.com
+
 ---
 
 ## Tech Stack
@@ -69,32 +77,33 @@ This project demonstrates modern full-stack development practices including REST
 - Redux state management
 - Cron jobs for background tasks
 
----
+## 📁 Project Structure
 
-## Project Structure
-
-blog-app
+```
+mern-blog-app/
 │
-├── client # React frontend
-│ ├── src
-│ │ ├── components
-│ │ ├── pages
-│ │ ├── utils
-│ │ └── redux
-│ └── package.json
+├── client/                # React frontend
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── utils/
+│   │   └── redux/
+│   ├── public/
+│   ├── package.json
+│   └── vercel.json
 │
-├── server # Node.js backend
-│ ├── controllers
-│ ├── models
-│ ├── routes
-│ ├── middleware
-│ ├── config
-│ ├── utils
-│ └── package.json
+├── server/                # Node.js backend
+│   ├── controllers/
+│   ├── models/
+│   ├── routes/
+│   ├── middleware/
+│   ├── config/
+│   ├── utils/
+│   ├── server.js
+│   └── package.json
 │
 └── README.md
-
----
+```
 
 ## Installation
 
@@ -130,16 +139,16 @@ http://localhost:5173
 
 Create a `.env` file inside the **server** folder and add the following:
 
+```env
 PORT=3000
 DB_URL=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
-
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
-
 EMAIL_USER=your_email
 EMAIL_PASS=your_email_password
+```
 
 #### Frontend Environment Variables
 
@@ -152,8 +161,8 @@ The backend uses rate limiting middleware to protect APIs from abuse.
 
 Example configuration:
 
-- Global API limit: **100 requests per 15 minutes**
-- Authentication limit: **5 login attempts per 15 minutes**
+- Global API limit: **200 requests per 15 minutes**
+- Authentication limit: **10 login attempts per 15 minutes**
 
 This helps prevent brute force attacks and excessive API usage.
 
