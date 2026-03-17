@@ -12,6 +12,9 @@ This project demonstrates modern full-stack development practices including REST
 ⚙️ **Backend (Render):**  
 👉 https://mern-blog-app-0ply.onrender.com
 
+📡 Sample API:
+👉 https://mern-blog-app-0ply.onrender.com/api/v1/blog
+
 ---
 
 ## Tech Stack
@@ -114,8 +117,8 @@ git clone https://github.com/your-username/blog-app.git
 cd blog-app
 ```
 
-
 #### Backend Setup
+
 Navigate to the server directory:
 
 ```cd server
@@ -126,6 +129,7 @@ http://localhost:3000
 ```
 
 #### Frontend Setup
+
 Open a new terminal and navigate to the client directory:
 
 ```cd client
