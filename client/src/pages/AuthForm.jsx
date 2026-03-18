@@ -17,6 +17,7 @@ function AuthForm({ type }) {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [message, setMessage] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.userAuth);
@@ -33,15 +34,23 @@ function AuthForm({ type }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+    setMessage(null);
     try {
       const res = await api.post(`/user/${type}`, userData);
       if (type == "signup") {
-        toast.success(res.data.message);
-        navigate("/signin");
+        setMessage(res.data.message);
+        setUserData({ name: "", email: "", password: "" });
+        setTimeout(() => navigate("/signin"), 2000);
       } else {
-        toast.success(res.data.message);
-        dispatch(signin({ ...res.data.user, token: res.data.token }));
-        navigate("/");
+        if (!res.data.token) {
+          setMessage(res.data.message);
+        } else {
+          toast.success(res.data.message);
+          setMessage(res.data.message);
+          dispatch(signin({ ...res.data.user, token: res.data.token }));
+          navigate("/");
+        }
       }
     } catch (err) {
       console.error(err);
@@ -57,6 +66,11 @@ function AuthForm({ type }) {
     const timer = setTimeout(() => setError(null), 5000);
     return () => clearTimeout(timer);
   }, [error]);
+  useEffect(() => {
+    if (!message) return;
+    const timer = setTimeout(() => setMessage(null), 5000);
+    return () => clearTimeout(timer);
+  }, [message]);
 
   if (token) {
     return <Navigate to={"/"} />;
@@ -69,6 +83,9 @@ function AuthForm({ type }) {
       </h1>
       <form onSubmit={handleSubmit}>
         {error && <p className="text-red-500 text-center mb-2">{error}</p>}
+        {message && (
+          <p className="text-green-500 text-center mb-2">{message}</p>
+        )}
         {type == "signup" && (
           <Input
             type="text"

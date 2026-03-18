@@ -56,34 +56,30 @@ async function createUser(req, res) {
         message: "You are already register please login",
       });
     }
-    if (user && !user.isVerify) {
-      if (user.emailVerificationExpire) {
-        const resendAllowedAt =
-          new Date(user.emailVerificationExpire).getTime() - 8 * 60 * 1000;
-        if (resendAllowedAt > Date.now()) {
-          return res.status(429).json({
-            message:
-              "Please wait 2 minutes before requesting another verification email",
-          });
-        }
-      }
-    }
 
     const { rawToken, hashToken } = getHashToken();
-    const url = `http://localhost:5173/verify-email/${rawToken}`;
+    const url = `${process.env.CLIENT_URL}/verify-email/${rawToken}`;
+    // const url = `http://localhost:5173/verify-email/${rawToken}`;
+    let emailSent = true;
     if (user && !user.isVerify) {
       user.emailVerificationToken = hashToken;
       user.emailVerificationExpire = new Date(Date.now() + 10 * 60 * 1000);
       await user.save();
-      sendMails(email, url).catch((err) => {
+      try {
+        await sendMails(email, url);
+      } catch (err) {
         console.error("Email Failed :", err);
-      });
+        emailSent = false;
+      }
+
       return res.status(200).json({
         success: true,
-        message:
-          "If this email exists, please check your inbox. You can resend the verification email after 2 minutes.",
+        message: emailSent
+          ? "Email verification link is sent to you Email please check your email inbox and verify email"
+          : "we couldn't send verification email. If this email exist then please try again later.",
       });
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const uid = new ShortUniqueId({ length: 5 });
     const uniqueId = uid.rnd();
@@ -96,13 +92,17 @@ async function createUser(req, res) {
       emailVerificationToken: hashToken,
       emailVerificationExpire: new Date(Date.now() + 10 * 60 * 1000),
     });
-    sendMails(email, url).catch((err) => {
+    try {
+      await sendMails(email, url);
+    } catch (err) {
       console.error("Email Failed :", err);
-    });
+      emailSent = false;
+    }
     return res.status(201).json({
       success: true,
-      message:
-        "If this email exists, please check your inbox. You can resend the verification email after 2 minutes.",
+      message: emailSent
+        ? "User registered. Please check your inbox and verify your email."
+        : "User registered, but we couldn't send verification email. If this email exist then please try again later.",
     });
   } catch (err) {
     console.error(err);
@@ -149,28 +149,24 @@ async function userLogin(req, res) {
       });
     }
     if (userExist && !userExist.isVerify) {
-      if (userExist.emailVerificationExpire) {
-        const resendAllowedAt =
-          new Date(userExist.emailVerificationExpire).getTime() - 8 * 60 * 1000;
-        if (resendAllowedAt > Date.now()) {
-          return res.status(429).json({
-            message:
-              "Please wait 2 minutes before requesting another verification email",
-          });
-        }
-      }
+      let emailSent = true;
       const { rawToken, hashToken } = getHashToken();
-      const url = `http://localhost:5173/verify-email/${rawToken}`;
+      const url = `${process.env.CLIENT_URL}/verify-email/${rawToken}`;
+      // const url = `http://localhost:5173/verify-email/${rawToken}`;
       userExist.emailVerificationToken = hashToken;
       userExist.emailVerificationExpire = new Date(Date.now() + 10 * 60 * 1000);
       await userExist.save();
-      sendMails(email, url).catch((err) => {
+      try {
+        await sendMails(email, url);
+      } catch (err) {
         console.error("Email Failed :", err);
-      });
+        emailSent = false;
+      }
       return res.status(200).json({
         success: true,
-        message:
-          "Account not verified. Verification email sent. You can resend after 2 minutes.",
+        message: emailSent
+          ? "Your account was not verified. I sent you a verification email link. Please verify your email first."
+          : "we couldn't send verification email. If this email exist then please try again later.",
       });
     }
 
