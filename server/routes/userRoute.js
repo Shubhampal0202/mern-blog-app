@@ -11,7 +11,6 @@ const {
   deleteUser,
   userLogin,
   fileUpload,
-  verifyEmail,
   followUserProfile,
   getFollowers,
   getFollowing,
@@ -44,8 +43,5 @@ router.get("/user/:username/followers", getFollowers);
 router.get("/user/:username/following", getFollowing);
 router.delete("/user/:userId", verifyUser, deleteUser);
 router.patch("/user/:username/follow", verifyUser, followUserProfile);
-
-// verify Email
-router.get("/email-verify/:verificationToken", verifyEmail);
 
 module.exports = router;

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { signin } from "../utils/store/slices/authSlice";
-import { useNavigate } from "react-router-dom";
 import { handleApiErrors } from "../utils/handleApiErrors";
 import api from "../utils/interceptor";
 
@@ -10,7 +9,7 @@ import api from "../utils/interceptor";
 function EditProfile() {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  
 
   const user = useSelector((state) => state.auth.userAuth);
   const {
@@ -21,6 +20,7 @@ function EditProfile() {
     name,
     userName,
   } = user || {};
+  console.log("user",user)
 
   const [userData, setUserData] = useState({
     name: name,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../utils/interceptor";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import Comment from "../components/Comment";
 import { createInitials } from "../utils/createInitials";
@@ -100,7 +100,6 @@ function BlogPage() {
   const { blogId } = useParams();
   const user = useSelector((state) => state.auth.userAuth);
   const { token = null, userId = null } = user || {};
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   async function fetchBlogData() {
@@ -176,7 +175,7 @@ function BlogPage() {
         },
       );
       toast.success(res.data.message);
-      navigate(-1);
+      navigate("/");
     } catch (err) {
       toast.error(handleApiErrors(err));
     }
@@ -279,7 +278,7 @@ function BlogPage() {
         </div>
         <div
           className="flex items-center gap-1 text-xl"
-          onClick={(e) => {
+          onClick={() => {
             handleSaveBlog(blogId, token, setBlogData);
           }}
         >

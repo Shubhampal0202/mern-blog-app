@@ -15,7 +15,7 @@ function Home() {
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.auth.userAuth);
   const { token = null } = user || {};
-
+  console.log(blogs);
 
   async function fetchBlogs() {
     if (loading || !hasMore) return;
@@ -48,7 +48,7 @@ function Home() {
     fetchBlogs();
   }, []);
   if (loading) {
-    return <Loader/>
+    return <Loader />;
   }
   return (
     <div>

@@ -30,16 +30,10 @@ const userSchema = new mongoose.Schema(
       required: [true, "userName is required"],
       unique: true,
     },
-    // blogs: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Blog",
-    //   },
-    // ],
-    isVerify: {
-      type: Boolean,
-      default: false,
-    },
+    // isVerify: {
+    //   type: Boolean,
+    //   default: false,
+    // },
     profilePic: {
       type: String,
       default: null,
@@ -77,14 +71,8 @@ const userSchema = new mongoose.Schema(
         ref: "Blog",
       },
     ],
-    showLikeBlogs: {
-      type: Boolean,
-      default: true,
-    },
-    emailVerificationToken: String,
-    emailVerificationExpire: Date,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const User = mongoose.model("User", userSchema);

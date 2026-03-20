@@ -8,11 +8,9 @@ const {
   verifyToken,
   getHashToken,
 } = require("../utils/generateToken");
-const transporter = require("../utils/transporter");
 const ShortUniqueId = require("short-unique-id");
 const cloudinary = require("../config/cloudinaryConfig");
 const validator = require("validator");
-const sendMails = require("../utils/sendMails");
 
 async function createUser(req, res) {
   try {
@@ -22,6 +20,7 @@ async function createUser(req, res) {
         .status(400)
         .json({ success: false, message: "Please Enter All Fields" });
     }
+    email = email.toLowerCase();
     if (!validator.isEmail(email)) {
       return res.status(400).json({
         success: false,
@@ -50,33 +49,10 @@ async function createUser(req, res) {
 
     let user = await User.findOne({ email: email });
 
-    if (user && user.isVerify) {
+    if (user) {
       return res.status(409).json({
         success: false,
         message: "You are already register please login",
-      });
-    }
-
-    const { rawToken, hashToken } = getHashToken();
-    const url = `${process.env.CLIENT_URL}/verify-email/${rawToken}`;
-    // const url = `http://localhost:5173/verify-email/${rawToken}`;
-    let emailSent = true;
-    if (user && !user.isVerify) {
-      user.emailVerificationToken = hashToken;
-      user.emailVerificationExpire = new Date(Date.now() + 10 * 60 * 1000);
-      await user.save();
-      try {
-        await sendMails(email, url);
-      } catch (err) {
-        console.error("Email Failed :", err);
-        emailSent = false;
-      }
-
-      return res.status(200).json({
-        success: true,
-        message: emailSent
-          ? "Email verification link is sent to you Email please check your email inbox and verify email"
-          : "we couldn't send verification email. If this email exist then please try again later.",
       });
     }
 
@@ -89,20 +65,10 @@ async function createUser(req, res) {
       email,
       password: hashedPassword,
       userName,
-      emailVerificationToken: hashToken,
-      emailVerificationExpire: new Date(Date.now() + 10 * 60 * 1000),
     });
-    try {
-      await sendMails(email, url);
-    } catch (err) {
-      console.error("Email Failed :", err);
-      emailSent = false;
-    }
     return res.status(201).json({
       success: true,
-      message: emailSent
-        ? "User registered. Please check your inbox and verify your email."
-        : "User registered, but we couldn't send verification email. If this email exist then please try again later.",
+      message: "User Created Successfully Please Login",
     });
   } catch (err) {
     console.error(err);
@@ -128,10 +94,13 @@ async function createUser(req, res) {
 
 async function userLogin(req, res) {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ message: "Please Enter All The Fields" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Please Enter All The Fields" });
     }
+    email = email.toLowerCase();
     const userExist = await User.findOne({ email });
     if (!userExist) {
       return res.status(401).json({
@@ -146,27 +115,6 @@ async function userLogin(req, res) {
         success: false,
         code: "INVALID_CREDENTIALS",
         message: "Invalid email or password",
-      });
-    }
-    if (userExist && !userExist.isVerify) {
-      let emailSent = true;
-      const { rawToken, hashToken } = getHashToken();
-      const url = `${process.env.CLIENT_URL}/verify-email/${rawToken}`;
-      // const url = `http://localhost:5173/verify-email/${rawToken}`;
-      userExist.emailVerificationToken = hashToken;
-      userExist.emailVerificationExpire = new Date(Date.now() + 10 * 60 * 1000);
-      await userExist.save();
-      try {
-        await sendMails(email, url);
-      } catch (err) {
-        console.error("Email Failed :", err);
-        emailSent = false;
-      }
-      return res.status(200).json({
-        success: true,
-        message: emailSent
-          ? "Your account was not verified. I sent you a verification email link. Please verify your email first."
-          : "we couldn't send verification email. If this email exist then please try again later.",
       });
     }
 
@@ -196,7 +144,7 @@ async function userLogin(req, res) {
 
 async function getAllUsers(req, res) {
   try {
-    let users = await User.find({ isVerify: true });
+    let users = await User.find({});
     return res.status(200).json({ users });
   } catch (err) {
     console.error(err);
@@ -211,7 +159,6 @@ async function getUserBlogs(req, res) {
   try {
     const profileUser = await User.findOne({
       userName: username,
-      isVerify: true,
     });
     if (!profileUser) {
       return res.status(404).json({
@@ -247,7 +194,6 @@ async function getUserSavedBlogs(req, res) {
   try {
     const profileUser = await User.findOne({
       userName: username,
-      isVerify: true,
     });
 
     if (!profileUser) {
@@ -281,7 +227,6 @@ async function getUserLikedBlogs(req, res) {
   try {
     const profileUser = await User.findOne({
       userName: username,
-      isVerify: true,
     });
     if (!profileUser) {
       return res
@@ -314,7 +259,6 @@ async function getUserDraftBlogs(req, res) {
   try {
     const profileUser = await User.findOne({
       userName: username,
-      isVerify: true,
     });
     if (!profileUser) {
       return res
@@ -347,7 +291,7 @@ async function getSingleUser(req, res) {
     let { username } = req.params;
     username = username.startsWith("@") ? username.slice(1) : username;
     const userProfile = await User.findOne(
-      { userName: username, isVerify: true },
+      { userName: username },
       "name userName profilePic bio followers following createdAt",
     );
 
@@ -430,6 +374,8 @@ async function updateUser(req, res) {
     const loggedInUserId = req.user._id;
     const { userId } = req.params;
     let { name, userName, bio } = req.body;
+    console.log("bio", bio);
+    console.log(typeof bio);
     const file = req.file;
     if (name && String(name).length < 3) {
       return res.status(400).json({
@@ -476,7 +422,7 @@ async function updateUser(req, res) {
 
       if (userName !== undefined) user.userName = userName;
       if (name !== undefined) user.name = name;
-      if (bio !== undefined) user.bio = bio;
+      if (bio !== undefined && bio !== "null") user.bio = bio;
       await user.save();
     } catch (err) {
       if (newImage) {
@@ -528,7 +474,7 @@ async function deleteUser(req, res) {
   try {
     const { userId: userName } = req.params;
     const loggedInUserId = req.user._id;
-    const user = await User.findOne({ userName, isVerify: true });
+    const user = await User.findOne({ userName });
     if (!user) {
       return res
         .status(404)
@@ -563,7 +509,7 @@ async function followUserProfile(req, res) {
   const loggedInUserId = req.user._id;
   const { username } = req.params;
   try {
-    const user = await User.findOne({ userName: username, isVerify: true });
+    const user = await User.findOne({ userName: username });
     if (!user) {
       return res
         .status(404)
@@ -605,39 +551,6 @@ async function followUserProfile(req, res) {
   }
 }
 
-async function verifyEmail(req, res) {
-  try {
-    const { verificationToken } = req.params;
-    const hashToken = crypto
-      .createHash("sha256")
-      .update(verificationToken)
-      .digest("hex");
-    const user = await User.findOne({
-      emailVerificationToken: hashToken,
-      emailVerificationExpire: { $gt: new Date(Date.now()) },
-    });
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        code: "INVALID_OR_EXPIRED_TOKEN",
-        message: "Verification link is invalid or expired",
-      });
-    }
-    user.isVerify = true;
-    user.emailVerificationToken = null;
-    user.emailVerificationExpire = null;
-    await user.save();
-    return res
-      .status(200)
-      .json({ success: true, message: "Account verified Please login" });
-  } catch (err) {
-    console.error(err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal Server Error" });
-  }
-}
-
 module.exports = {
   createUser,
   getAllUsers,
@@ -645,7 +558,6 @@ module.exports = {
   updateUser,
   deleteUser,
   userLogin,
-  verifyEmail,
   followUserProfile,
   getFollowers,
   getFollowing,

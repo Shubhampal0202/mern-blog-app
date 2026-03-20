@@ -38,23 +38,17 @@ function AuthForm({ type }) {
     setMessage(null);
     try {
       const res = await api.post(`/user/${type}`, userData);
-      if (type == "signup") {
+      if (type === "signup") {
         setMessage(res.data.message);
         setUserData({ name: "", email: "", password: "" });
-        setTimeout(() => navigate("/signin"), 2000);
+        setTimeout(() => navigate("/signin"), 3000);
       } else {
-        if (!res.data.token) {
-          setMessage(res.data.message);
-        } else {
-          toast.success(res.data.message);
-          setMessage(res.data.message);
-          dispatch(signin({ ...res.data.user, token: res.data.token }));
-          navigate("/");
-        }
+        toast.success(res.data.message);
+        dispatch(signin({ ...res.data.user, token: res.data.token }));
+        navigate("/");
       }
     } catch (err) {
       console.error(err);
-      toast.error(handleApiErrors(err));
       setError(handleApiErrors(err));
       setUserData((prev) => ({ ...prev, password: "" }));
     } finally {
@@ -68,7 +62,7 @@ function AuthForm({ type }) {
   }, [error]);
   useEffect(() => {
     if (!message) return;
-    const timer = setTimeout(() => setMessage(null), 5000);
+    const timer = setTimeout(() => setMessage(null), 3000);
     return () => clearTimeout(timer);
   }, [message]);
 
@@ -86,7 +80,7 @@ function AuthForm({ type }) {
         {message && (
           <p className="text-green-500 text-center mb-2">{message}</p>
         )}
-        {type == "signup" && (
+        {type === "signup" && (
           <Input
             type="text"
             placeholder={"Enter Your Name"}
@@ -121,7 +115,7 @@ function AuthForm({ type }) {
             className={`border px-2 py-2 rounded my-2 w-[100px] ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-slate-600"} text-white hover:bg-slate-500 ease-in-out duration-300`}
             type="submit"
           >
-            {loading ? "Please Wait" : type == "signin" ? "Sign In" : "Sign Up"}
+            {loading ? "Please Wait" : type === "signin" ? "Sign In" : "Sign Up"}
           </button>
         </div>
       </form>

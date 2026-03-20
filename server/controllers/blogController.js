@@ -86,7 +86,6 @@ async function createBlog(req, res) {
     const uid = new ShortUniqueId({ length: 10 });
     const uniqueId = uid.rnd();
     blogId = blogId + "-" + uniqueId;
-    
 
     const { secure_url, public_id } = await cloudinary.uploader.upload(
       `data:${file.mimetype};base64,${file.buffer.toString("base64")}`,
@@ -94,7 +93,6 @@ async function createBlog(req, res) {
         folder: "Blog-App",
       },
     );
-
 
     let blog;
 
@@ -110,7 +108,7 @@ async function createBlog(req, res) {
         imageId: public_id,
       });
       await blog.save();
-  
+
       return res.status(201).json({
         success: true,
         message: isPrivate
@@ -156,13 +154,12 @@ async function getBlog(req, res) {
         select: "name email followers userName",
       })
       .lean();
-    
+
     if (!blog) {
       return res
         .status(404)
         .json({ success: false, message: "Blog not found" });
     }
-
 
     const comments = await Comment.find({
       blog: blog._id,
@@ -254,6 +251,7 @@ async function getAllBlogs(req, res) {
         path: "creator",
         select: "name email",
       });
+  
 
     const hasMore = blogs.length > limit;
     if (hasMore) {
@@ -266,6 +264,7 @@ async function getAllBlogs(req, res) {
       ...blog.toObject(),
       isSave: saveBlogs.some((id) => id.equals(blog._id)),
     }));
+
     return res
       .status(200)
       .json({ success: true, blogs: finalBlogs, hasMore, nextCursor });

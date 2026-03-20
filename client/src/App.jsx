@@ -6,7 +6,6 @@ import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AddBlog from "./pages/AddBlog";
 import BlogPage from "./pages/BlogPage";
-import VerifyEmail from "./components/VerifyEmail";
 import ProfilePage from "./pages/ProfilePage";
 import EditProfile from "./pages/EditProfile";
 import SearchBlog from "./components/SearchBlog";
@@ -42,10 +41,6 @@ function App() {
         <Route path="blog/:blogId" element={<BlogPage />} />
         <Route path="/search" element={<SearchBlog />} />
         <Route path="/tag/:tag" element={<SearchBlog />} />
-        <Route
-          path="verify-email/:verificationToken"
-          element={<VerifyEmail />}
-        />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </div>

@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { verifyToken } = require("../utils/generateToken");
 const User = require("../model/userSchema");
-const { verify } = require("../utils/transporter");
+
 
 const optionalAuth = async (req, res, next) => {
   try {
